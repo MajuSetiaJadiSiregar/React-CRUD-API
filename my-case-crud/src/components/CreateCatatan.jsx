@@ -1,13 +1,15 @@
 import React,{useState, useEffect} from 'react';
-import DataPicker from 'react-datepicker';
+import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
-/**EcmaScript => 6 dan 7, spread operator */
-const CreateCatatan = () => {
-   /**desctructur array */
+
+const CreateCatatan = (props) => {
+
    const [inputan, setInputan] = useState({title : '', noted : '', dosen : '', date : new Date()});
    const [dosen, setDosen] = useState([]);
    const [dosenSelected, setDosenSelected] = useState('');
+   const [update, setUpdate] = useState(false);
+   const [id, setId] = useState('');
 
    const handleOnChange = e => {
       const { name, value } = e.target;
@@ -20,7 +22,12 @@ const CreateCatatan = () => {
 
    const handleOnSubmit = async e => {
       e.preventDefault();
-      await axios.post('http://localhost:5050/api/catatan', inputan);
+      if(update){
+         await axios.put('http://localhost:5050/api/catatan/' + id, inputan);
+      } else {
+         await axios.post('http://localhost:5050/api/catatan', inputan);
+      }
+      window.location.href ='/'
    };
 
 
@@ -34,6 +41,16 @@ const CreateCatatan = () => {
                setDosenSelected(res.data[0].name);
             };
          }).catch(err => console.log(err));
+         if(props.match.params.id){
+            console.log(props.match.params.id);
+            await axios.get('http://localhost:5050/api/catatan/' + props.match.params.id)
+            .then((res) => {
+               console.log(res);
+               setInputan({title : res.data.title, noted : res.data.noted, dosen : res.data.dosen, date : new Date()});
+               setUpdate(true);
+               setId(res.data._id);
+            });
+         }
       };
       readDosen();
    },[]);
@@ -44,10 +61,10 @@ const CreateCatatan = () => {
             <h3>Catatan</h3>
             <form onSubmit={handleOnSubmit}>
                <div className="form-group">
-                  <select className='form-control' name='dosen' defaultValue={dosenSelected} onChange={handleOnChange} required>
+                  <select className='form-control' name='dosen' value={inputan.dosen} onChange={handleOnChange} required>
                      {
                         dosen.map(listDosen => (
-                           <option key={listDosen} value={listDosen}>{listDosen}</option>
+                           <option key={listDosen}  value={listDosen} onChange={handleOnChange}>{listDosen}</option>
                         ))
                      }
                   </select>
@@ -61,7 +78,7 @@ const CreateCatatan = () => {
                   <textarea type='text' className='form-control' name='noted' onChange={handleOnChange} value={inputan.noted} required></textarea>
                </div>
                <div className="form-group">
-                  <DataPicker className='form-control' value={inputan.date} selected={inputan.date} onChange={handleOnChangeDate}/>
+                  <DatePicker className='form-control'  selected={inputan.date} onChange={handleOnChangeDate}/>
                </div>
                <div>
                   <button className='btn btn-primary'>Create Catatan</button>
