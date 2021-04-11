@@ -24,12 +24,15 @@ const CreateDosen = () => {
    };
 
    const deleteDosen = async dosenId => {
-      const responseUser = window.confirm('Yakin mau Hapus ... ?');
-      if(responseUser) {
-         await axios.delete('http://localhost:5050/api/dosen/' + dosenId);
-         readDataDosen();
-      };
-      console.log(responseUser);
+      try {
+         const responseUser = window.confirm('Yakin mau Hapus ... ?');
+         if(responseUser) {
+            await axios.delete('http://localhost:5050/api/dosen/' + dosenId);
+            readDataDosen();
+         };
+      } catch (error) {
+         console.log(error)  
+      }
    };
 
    useEffect(() => {

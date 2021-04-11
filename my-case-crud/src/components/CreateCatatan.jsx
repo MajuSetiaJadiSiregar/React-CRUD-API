@@ -50,6 +50,8 @@ const CreateCatatan = (props) => {
                setUpdate(true);
                setId(res.data._id);
             });
+         } else {
+            console.log('test')
          }
       };
       readDosen();
